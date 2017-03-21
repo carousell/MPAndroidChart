@@ -7,8 +7,7 @@ import java.text.DecimalFormat;
 /**
  * Created by philipp on 02/06/16.
  */
-public class DefaultAxisValueFormatter implements IAxisValueFormatter
-{
+public class DefaultAxisValueFormatter implements IAxisValueFormatter {
 
     /**
      * decimalformat for formatting
@@ -31,8 +30,7 @@ public class DefaultAxisValueFormatter implements IAxisValueFormatter
 
         StringBuffer b = new StringBuffer();
         for (int i = 0; i < digits; i++) {
-            if (i == 0)
-                b.append(".");
+            if (i == 0) b.append(".");
             b.append("0");
         }
 
@@ -43,6 +41,11 @@ public class DefaultAxisValueFormatter implements IAxisValueFormatter
     public String getFormattedValue(float value, AxisBase axis) {
         // avoid memory allocations here (for performance)
         return mFormat.format(value);
+    }
+
+    @Override
+    public int getFormattedColor(float value, AxisBase axis) {
+        return 0;
     }
 
     /**

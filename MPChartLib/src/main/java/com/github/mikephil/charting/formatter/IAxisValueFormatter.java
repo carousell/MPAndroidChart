@@ -7,8 +7,7 @@ import com.github.mikephil.charting.components.AxisBase;
  * Custom formatter interface that allows formatting of
  * axis labels before they are being drawn.
  */
-public interface IAxisValueFormatter
-{
+public interface IAxisValueFormatter {
 
     /**
      * Called when a value from an axis is to be formatted
@@ -20,4 +19,6 @@ public interface IAxisValueFormatter
      * @return
      */
     String getFormattedValue(float value, AxisBase axis);
+
+    int getFormattedColor(float value, AxisBase axis);
 }
