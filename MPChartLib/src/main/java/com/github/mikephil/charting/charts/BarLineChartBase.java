@@ -78,7 +78,8 @@ public abstract class BarLineChartBase<T extends BarLineScatterCandleBubbleData<
     /**
      * if true, dragging is enabled for the chart
      */
-    private boolean mDragEnabled = true;
+    private boolean mDragXEnabled = true;
+    private boolean mDragYEnabled = true;
 
     private boolean mScaleXEnabled = true;
     private boolean mScaleYEnabled = true;
@@ -211,9 +212,14 @@ public abstract class BarLineChartBase<T extends BarLineScatterCandleBubbleData<
         mAxisRendererLeft.renderAxisLine(canvas);
         mAxisRendererRight.renderAxisLine(canvas);
 
-        mXAxisRenderer.renderGridLines(canvas);
-        mAxisRendererLeft.renderGridLines(canvas);
-        mAxisRendererRight.renderGridLines(canvas);
+        if (mXAxis.isDrawGridLinesBehindDataEnabled())
+            mXAxisRenderer.renderGridLines(canvas);
+
+        if (mAxisLeft.isDrawGridLinesBehindDataEnabled())
+            mAxisRendererLeft.renderGridLines(canvas);
+
+        if (mAxisRight.isDrawGridLinesBehindDataEnabled())
+            mAxisRendererRight.renderGridLines(canvas);
 
         if (mXAxis.isEnabled() && mXAxis.isDrawLimitLinesBehindDataEnabled())
             mXAxisRenderer.renderLimitLines(canvas);
@@ -229,6 +235,15 @@ public abstract class BarLineChartBase<T extends BarLineScatterCandleBubbleData<
         canvas.clipRect(mViewPortHandler.getContentRect());
 
         mRenderer.drawData(canvas);
+
+        if (!mXAxis.isDrawGridLinesBehindDataEnabled())
+            mXAxisRenderer.renderGridLines(canvas);
+
+        if (!mAxisLeft.isDrawGridLinesBehindDataEnabled())
+            mAxisRendererLeft.renderGridLines(canvas);
+
+        if (!mAxisRight.isDrawGridLinesBehindDataEnabled())
+            mAxisRendererRight.renderGridLines(canvas);
 
         // if highlighting is enabled
         if (valuesToHighlight())
@@ -426,18 +441,12 @@ public abstract class BarLineChartBase<T extends BarLineScatterCandleBubbleData<
                             offsets.top += Math.min(mLegend.mNeededHeight,
                                     mViewPortHandler.getChartHeight() * mLegend.getMaxSizePercent())
                                     + mLegend.getYOffset();
-
-                            if (getXAxis().isEnabled() && getXAxis().isDrawLabelsEnabled())
-                                offsets.top += getXAxis().mLabelRotatedHeight;
                             break;
 
                         case BOTTOM:
                             offsets.bottom += Math.min(mLegend.mNeededHeight,
                                     mViewPortHandler.getChartHeight() * mLegend.getMaxSizePercent())
                                     + mLegend.getYOffset();
-
-                            if (getXAxis().isEnabled() && getXAxis().isDrawLabelsEnabled())
-                                offsets.bottom += getXAxis().mLabelRotatedHeight;
                             break;
 
                         default:
@@ -477,21 +486,21 @@ public abstract class BarLineChartBase<T extends BarLineScatterCandleBubbleData<
 
             if (mXAxis.isEnabled() && mXAxis.isDrawLabelsEnabled()) {
 
-                float xlabelheight = mXAxis.mLabelRotatedHeight + mXAxis.getYOffset();
+                float xLabelHeight = mXAxis.mLabelRotatedHeight + mXAxis.getYOffset();
 
                 // offsets for x-labels
                 if (mXAxis.getPosition() == XAxisPosition.BOTTOM) {
 
-                    offsetBottom += xlabelheight;
+                    offsetBottom += xLabelHeight;
 
                 } else if (mXAxis.getPosition() == XAxisPosition.TOP) {
 
-                    offsetTop += xlabelheight;
+                    offsetTop += xLabelHeight;
 
                 } else if (mXAxis.getPosition() == XAxisPosition.BOTH_SIDED) {
 
-                    offsetBottom += xlabelheight;
-                    offsetTop += xlabelheight;
+                    offsetBottom += xLabelHeight;
+                    offsetTop += xLabelHeight;
                 }
             }
 
@@ -699,20 +708,14 @@ public abstract class BarLineChartBase<T extends BarLineScatterCandleBubbleData<
     public void zoomAndCenterAnimated(float scaleX, float scaleY, float xValue, float yValue, AxisDependency axis,
                                       long duration) {
 
-        if (android.os.Build.VERSION.SDK_INT >= 11) {
+        MPPointD origin = getValuesByTouchPoint(mViewPortHandler.contentLeft(), mViewPortHandler.contentTop(), axis);
 
-            MPPointD origin = getValuesByTouchPoint(mViewPortHandler.contentLeft(), mViewPortHandler.contentTop(), axis);
+        Runnable job = AnimatedZoomJob.getInstance(mViewPortHandler, this, getTransformer(axis), getAxis(axis), mXAxis
+                        .mAxisRange, scaleX, scaleY, mViewPortHandler.getScaleX(), mViewPortHandler.getScaleY(),
+                xValue, yValue, (float) origin.x, (float) origin.y, duration);
+        addViewportJob(job);
 
-            Runnable job = AnimatedZoomJob.getInstance(mViewPortHandler, this, getTransformer(axis), getAxis(axis), mXAxis
-                            .mAxisRange, scaleX, scaleY, mViewPortHandler.getScaleX(), mViewPortHandler.getScaleY(),
-                    xValue, yValue, (float) origin.x, (float) origin.y, duration);
-            addViewportJob(job);
-
-            MPPointD.recycleInstance(origin);
-
-        } else {
-            Log.e(LOG_TAG, "Unable to execute zoomAndCenterAnimated(...) on API level < 11");
-        }
+        MPPointD.recycleInstance(origin);
     }
 
     protected Matrix mFitScreenMatrixBuffer = new Matrix();
@@ -865,21 +868,16 @@ public abstract class BarLineChartBase<T extends BarLineScatterCandleBubbleData<
     @TargetApi(11)
     public void moveViewToAnimated(float xValue, float yValue, AxisDependency axis, long duration) {
 
-        if (android.os.Build.VERSION.SDK_INT >= 11) {
+        MPPointD bounds = getValuesByTouchPoint(mViewPortHandler.contentLeft(), mViewPortHandler.contentTop(), axis);
 
-            MPPointD bounds = getValuesByTouchPoint(mViewPortHandler.contentLeft(), mViewPortHandler.contentTop(), axis);
+        float yInView = getAxisRange(axis) / mViewPortHandler.getScaleY();
 
-            float yInView = getAxisRange(axis) / mViewPortHandler.getScaleY();
+        Runnable job = AnimatedMoveViewJob.getInstance(mViewPortHandler, xValue, yValue + yInView / 2f,
+                getTransformer(axis), this, (float) bounds.x, (float) bounds.y, duration);
 
-            Runnable job = AnimatedMoveViewJob.getInstance(mViewPortHandler, xValue, yValue + yInView / 2f,
-                    getTransformer(axis), this, (float) bounds.x, (float) bounds.y, duration);
+        addViewportJob(job);
 
-            addViewportJob(job);
-
-            MPPointD.recycleInstance(bounds);
-        } else {
-            Log.e(LOG_TAG, "Unable to execute moveViewToAnimated(...) on API level < 11");
-        }
+        MPPointD.recycleInstance(bounds);
     }
 
     /**
@@ -932,23 +930,18 @@ public abstract class BarLineChartBase<T extends BarLineScatterCandleBubbleData<
     @TargetApi(11)
     public void centerViewToAnimated(float xValue, float yValue, AxisDependency axis, long duration) {
 
-        if (android.os.Build.VERSION.SDK_INT >= 11) {
+        MPPointD bounds = getValuesByTouchPoint(mViewPortHandler.contentLeft(), mViewPortHandler.contentTop(), axis);
 
-            MPPointD bounds = getValuesByTouchPoint(mViewPortHandler.contentLeft(), mViewPortHandler.contentTop(), axis);
+        float yInView = getAxisRange(axis) / mViewPortHandler.getScaleY();
+        float xInView = getXAxis().mAxisRange / mViewPortHandler.getScaleX();
 
-            float yInView = getAxisRange(axis) / mViewPortHandler.getScaleY();
-            float xInView = getXAxis().mAxisRange / mViewPortHandler.getScaleX();
+        Runnable job = AnimatedMoveViewJob.getInstance(mViewPortHandler,
+                xValue - xInView / 2f, yValue + yInView / 2f,
+                getTransformer(axis), this, (float) bounds.x, (float) bounds.y, duration);
 
-            Runnable job = AnimatedMoveViewJob.getInstance(mViewPortHandler,
-                    xValue - xInView / 2f, yValue + yInView / 2f,
-                    getTransformer(axis), this, (float) bounds.x, (float) bounds.y, duration);
+        addViewportJob(job);
 
-            addViewportJob(job);
-
-            MPPointD.recycleInstance(bounds);
-        } else {
-            Log.e(LOG_TAG, "Unable to execute centerViewToAnimated(...) on API level < 11");
-        }
+        MPPointD.recycleInstance(bounds);
     }
 
     /**
@@ -1097,7 +1090,8 @@ public abstract class BarLineChartBase<T extends BarLineScatterCandleBubbleData<
      * @param enabled
      */
     public void setDragEnabled(boolean enabled) {
-        this.mDragEnabled = enabled;
+        this.mDragXEnabled = enabled;
+        this.mDragYEnabled = enabled;
     }
 
     /**
@@ -1106,7 +1100,43 @@ public abstract class BarLineChartBase<T extends BarLineScatterCandleBubbleData<
      * @return
      */
     public boolean isDragEnabled() {
-        return mDragEnabled;
+        return mDragXEnabled || mDragYEnabled;
+    }
+
+    /**
+     * Set this to true to enable dragging on the X axis
+     *
+     * @param enabled
+     */
+    public void setDragXEnabled(boolean enabled) {
+        this.mDragXEnabled = enabled;
+    }
+
+    /**
+     * Returns true if dragging on the X axis is enabled for the chart, false if not.
+     *
+     * @return
+     */
+    public boolean isDragXEnabled() {
+        return mDragXEnabled;
+    }
+
+    /**
+     * Set this to true to enable dragging on the Y axis
+     *
+     * @param enabled
+     */
+    public void setDragYEnabled(boolean enabled) {
+        this.mDragYEnabled = enabled;
+    }
+
+    /**
+     * Returns true if dragging on the Y axis is enabled for the chart, false if not.
+     *
+     * @return
+     */
+    public boolean isDragYEnabled() {
+        return mDragYEnabled;
     }
 
     /**
@@ -1186,7 +1216,7 @@ public abstract class BarLineChartBase<T extends BarLineScatterCandleBubbleData<
 
     /**
      * When enabled, the values will be clipped to contentRect,
-     *   otherwise they can bleed outside the content rect.
+     * otherwise they can bleed outside the content rect.
      *
      * @param enabled
      */
@@ -1196,7 +1226,7 @@ public abstract class BarLineChartBase<T extends BarLineScatterCandleBubbleData<
 
     /**
      * When enabled, the values will be clipped to contentRect,
-     *   otherwise they can bleed outside the content rect.
+     * otherwise they can bleed outside the content rect.
      *
      * @return
      */

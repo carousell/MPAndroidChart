@@ -5,7 +5,7 @@ import android.graphics.DashPathEffect;
 import android.util.Log;
 
 import com.github.mikephil.charting.formatter.DefaultAxisValueFormatter;
-import com.github.mikephil.charting.formatter.IAxisValueFormatter;
+import com.github.mikephil.charting.formatter.ValueFormatter;
 import com.github.mikephil.charting.utils.Utils;
 
 import java.util.ArrayList;
@@ -21,7 +21,7 @@ public abstract class AxisBase extends ComponentBase {
     /**
      * custom formatter that is used instead of the auto-formatter if set
      */
-    protected IAxisValueFormatter mAxisValueFormatter;
+    protected ValueFormatter mAxisValueFormatter;
 
     private int mGridColor = Color.GRAY;
 
@@ -110,6 +110,11 @@ public abstract class AxisBase extends ComponentBase {
      * flag indicating the limit lines layer depth
      */
     protected boolean mDrawLimitLineBehindData = false;
+
+    /**
+     * flag indicating the grid lines layer depth
+     */
+    protected boolean mDrawGridLinesBehindData = true;
 
     /**
      * Extra spacing for `axisMinimum` to be added to automatically calculated `axisMinimum`
@@ -309,8 +314,10 @@ public abstract class AxisBase extends ComponentBase {
      */
     public void setLabelCount(int count) {
 
-        if (count > 25) count = 25;
-        if (count < 2) count = 2;
+        if (count > 25)
+            count = 25;
+        if (count < 2)
+            count = 2;
 
         mLabelCount = count;
         mForceLabels = false;
@@ -397,7 +404,8 @@ public abstract class AxisBase extends ComponentBase {
 
         if (mLimitLines.size() > 6) {
             Log.e("MPAndroiChart",
-                    "Warning! You have more than 6 LimitLines on your axis, do you really want " + "that?");
+                    "Warning! You have more than 6 LimitLines on your axis, do you really want " +
+                            "that?");
         }
     }
 
@@ -441,6 +449,18 @@ public abstract class AxisBase extends ComponentBase {
     }
 
     /**
+     * If this is set to false, the grid lines are draw on top of the actual data,
+     * otherwise behind. Default: true
+     *
+     * @param enabled
+     */
+    public void setDrawGridLinesBehindData(boolean enabled) { mDrawGridLinesBehindData = enabled; }
+
+    public boolean isDrawGridLinesBehindDataEnabled() {
+        return mDrawGridLinesBehindData;
+    }
+
+    /**
      * Returns the longest formatted label (in terms of characters), this axis
      * contains.
      *
@@ -453,7 +473,8 @@ public abstract class AxisBase extends ComponentBase {
         for (int i = 0; i < mEntries.length; i++) {
             String text = getFormattedLabel(i);
 
-            if (text != null && longest.length() < text.length()) longest = text;
+            if (text != null && longest.length() < text.length())
+                longest = text;
         }
 
         return longest;
@@ -474,11 +495,13 @@ public abstract class AxisBase extends ComponentBase {
 
     public String getFormattedLabel(int index) {
 
-        if (index < 0 || index >= mEntries.length) {
+        if (index < 0 || index >= mEntries.length)
             return "";
-        } else {
-            return getValueFormatter().getFormattedValue(mEntries[index], this);
-        }
+//    } else {
+//        return getValueFormatter().getFormattedValue(mEntries[index], this);
+//    }
+        else
+            return getValueFormatter().getAxisLabel(mEntries[index], this);
     }
 
     /**
@@ -490,13 +513,12 @@ public abstract class AxisBase extends ComponentBase {
      *
      * @param f
      */
-    public void setValueFormatter(IAxisValueFormatter f) {
+    public void setValueFormatter(ValueFormatter f) {
 
-        if (f == null) {
+        if (f == null)
             mAxisValueFormatter = new DefaultAxisValueFormatter(mDecimals);
-        } else {
+        else
             mAxisValueFormatter = f;
-        }
     }
 
     /**
@@ -504,12 +526,12 @@ public abstract class AxisBase extends ComponentBase {
      *
      * @return
      */
-    public IAxisValueFormatter getValueFormatter() {
+    public ValueFormatter getValueFormatter() {
 
-        if (mAxisValueFormatter == null || (mAxisValueFormatter instanceof DefaultAxisValueFormatter &&
-                ((DefaultAxisValueFormatter) mAxisValueFormatter).getDecimalDigits() != mDecimals)) {
+        if (mAxisValueFormatter == null ||
+                (mAxisValueFormatter instanceof DefaultAxisValueFormatter &&
+                        ((DefaultAxisValueFormatter)mAxisValueFormatter).getDecimalDigits() != mDecimals))
             mAxisValueFormatter = new DefaultAxisValueFormatter(mDecimals);
-        }
 
         return mAxisValueFormatter;
     }
@@ -524,7 +546,9 @@ public abstract class AxisBase extends ComponentBase {
      * @param phase       offset, in degrees (normally, use 0)
      */
     public void enableGridDashedLine(float lineLength, float spaceLength, float phase) {
-        mGridDashPathEffect = new DashPathEffect(new float[]{lineLength, spaceLength}, phase);
+        mGridDashPathEffect = new DashPathEffect(new float[]{
+                lineLength, spaceLength
+        }, phase);
     }
 
     /**
@@ -574,7 +598,9 @@ public abstract class AxisBase extends ComponentBase {
      * @param phase       offset, in degrees (normally, use 0)
      */
     public void enableAxisLineDashedLine(float lineLength, float spaceLength, float phase) {
-        mAxisLineDashPathEffect = new DashPathEffect(new float[]{lineLength, spaceLength}, phase);
+        mAxisLineDashPathEffect = new DashPathEffect(new float[]{
+                lineLength, spaceLength
+        }, phase);
     }
 
     /**
@@ -741,28 +767,32 @@ public abstract class AxisBase extends ComponentBase {
     /**
      * Gets extra spacing for `axisMinimum` to be added to automatically calculated `axisMinimum`
      */
-    public float getSpaceMin() {
+    public float getSpaceMin()
+    {
         return mSpaceMin;
     }
 
     /**
      * Sets extra spacing for `axisMinimum` to be added to automatically calculated `axisMinimum`
      */
-    public void setSpaceMin(float mSpaceMin) {
+    public void setSpaceMin(float mSpaceMin)
+    {
         this.mSpaceMin = mSpaceMin;
     }
 
     /**
      * Gets extra spacing for `axisMaximum` to be added to automatically calculated `axisMaximum`
      */
-    public float getSpaceMax() {
+    public float getSpaceMax()
+    {
         return mSpaceMax;
     }
 
     /**
      * Sets extra spacing for `axisMaximum` to be added to automatically calculated `axisMaximum`
      */
-    public void setSpaceMax(float mSpaceMax) {
+    public void setSpaceMax(float mSpaceMax)
+    {
         this.mSpaceMax = mSpaceMax;
     }
 }
