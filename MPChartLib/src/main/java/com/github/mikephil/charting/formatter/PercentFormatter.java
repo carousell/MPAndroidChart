@@ -56,11 +56,6 @@ public class PercentFormatter extends ValueFormatter
         return mFormat.format(value) + " %";
     }
 
-    @Override
-    public int getFormattedColor(float value, AxisBase axis) {
-        return 0;
-    }
-
     public int getDecimalDigits() {
         return 1;
     }

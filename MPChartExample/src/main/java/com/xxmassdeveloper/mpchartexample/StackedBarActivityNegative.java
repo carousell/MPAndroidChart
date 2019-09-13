@@ -85,11 +85,6 @@ public class StackedBarActivityNegative extends DemoBase implements
             public String getFormattedValue(float value) {
                 return format.format(value) + "-" + format.format(value + 10);
             }
-
-            @Override
-            public int getFormattedColor(float value, AxisBase axis) {
-                return 0;
-            }
         });
 
         Legend l = chart.getLegend();
@@ -255,11 +250,6 @@ public class StackedBarActivityNegative extends DemoBase implements
         @Override
         public String getFormattedValue(float value) {
             return mFormat.format(Math.abs(value)) + "m";
-        }
-
-        @Override
-        public int getFormattedColor(float value, AxisBase axis) {
-            return 0;
         }
     }
 }

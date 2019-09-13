@@ -23,11 +23,6 @@ public class MyValueFormatter extends ValueFormatter
     }
 
     @Override
-    public int getFormattedColor(float value, AxisBase axis) {
-        return 0;
-    }
-
-    @Override
     public String getAxisLabel(float value, AxisBase axis) {
         if (axis instanceof XAxis) {
             return mFormat.format(value);

@@ -59,11 +59,6 @@ public class IndexAxisValueFormatter extends ValueFormatter
         return mValues[index];
     }
 
-    @Override
-    public int getFormattedColor(float value, AxisBase axis) {
-        return 0;
-    }
-
     public String[] getValues() {
         return mValues;
     }

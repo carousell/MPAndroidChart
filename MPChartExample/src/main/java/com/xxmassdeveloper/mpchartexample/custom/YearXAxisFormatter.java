@@ -24,9 +24,4 @@ public class YearXAxisFormatter extends ValueFormatter
         float percent = value / axis.mAxisRange;
         return mMonths[(int) (mMonths.length * percent)];
     }
-
-    @Override
-    public int getFormattedColor(float value, AxisBase axis) {
-        return 0;
-    }
 }

@@ -69,9 +69,4 @@ public class StackedValueFormatter extends ValueFormatter
         // return the "proposed" value
         return mFormat.format(value) + mSuffix;
     }
-
-    @Override
-    public int getFormattedColor(float value, AxisBase axis) {
-        return 0;
-    }
 }

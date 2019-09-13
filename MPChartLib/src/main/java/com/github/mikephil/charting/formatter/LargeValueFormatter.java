@@ -43,11 +43,6 @@ public class LargeValueFormatter extends ValueFormatter
         return makePretty(value) + mText;
     }
 
-    @Override
-    public int getFormattedColor(float value, AxisBase axis) {
-        return 0;
-    }
-
     /**
      * Set an appendix text to be added at the end of the formatted value.
      *

@@ -40,9 +40,4 @@ public class MyCustomXAxisValueFormatter extends ValueFormatter
         else
             return mFormat.format(value);
     }
-
-    @Override
-    public int getFormattedColor(float value, AxisBase axis) {
-        return 0;
-    }
 }

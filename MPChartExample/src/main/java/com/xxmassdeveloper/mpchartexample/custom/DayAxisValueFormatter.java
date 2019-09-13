@@ -68,11 +68,6 @@ public class DayAxisValueFormatter extends ValueFormatter
         }
     }
 
-    @Override
-    public int getFormattedColor(float value, AxisBase axis) {
-        return 0;
-    }
-
     private int getDaysForMonth(int month, int year) {
 
         // month is 0-based

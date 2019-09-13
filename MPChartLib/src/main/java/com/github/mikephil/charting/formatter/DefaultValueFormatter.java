@@ -58,11 +58,6 @@ public class DefaultValueFormatter extends ValueFormatter
         return mFormat.format(value);
     }
 
-    @Override
-    public int getFormattedColor(float value, AxisBase axis) {
-        return 0;
-    }
-
     /**
      * Returns the number of decimal digits this formatter uses.
      *
